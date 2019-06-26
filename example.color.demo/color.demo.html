@@ -20,11 +20,37 @@
     </style>
     <head>
             <script language="javascript" type="text/javascript" src="getRGB.js"></script>
+            <script  src = "https://liquidcarrot.io/carrot/cdn/0.2.27/carrot.js"></script>
     </head>
     <body>
         <div id="Title"><b>Liquid Carrot Demo: Color Picker</b></div> 
         <div id="colorDemoTitle">Liquid Carrot</div>
         <p>Pick a color for the background and see how the text changes color based on background of the color!</p>
         <input type = "color" value="#ddced7"/>
+        <script> 
+                const{ Network, methods } = carrot; 
+                const input = document.querySelector("input")
+                const text = document.querySelector("#colorDemoTitle")
+        
+            input.addEventListener("change", (e) => {
+                const rgb = getRgb(e.target.value);      
+                const myNetwork = new Network(3,1);
+        
+                const trainingSet = [
+                    { input: [0.62,0.72,0.88], output: [1] },
+                    { input: [0.1,0.84,0.72], output: [1] },
+                    { input: [0.33,0.24,0.29], output: [0] },
+                    { input: [0.74,0.78,0.86], output: [1] },
+                    { input: [0.31,0.35,0.41], output: [0] },
+                ];
+        
+            myNetwork.train(trainingSet);
+        
+            const pickColor = myNetwork.activate(rgb); 
+            
+            text.style.background = e.target.value
+            text.style.color = Math.round(pickColor) === 0 ? "white" : "black" 
+          })
+            </script>
     </body>
 </html>
