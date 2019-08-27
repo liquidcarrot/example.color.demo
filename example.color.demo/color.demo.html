@@ -1,61 +1,95 @@
 <html>
-    <title>
-        Liquid Carrot Color Demo
-    </title>
-    <style>
-     body {
-        font-family: 'Courier New';
+<head>
+  <title>
+      Liquid Carrot - Color Bot
+  </title>
+  <style>
+    body {
+      font-family: sans-serif, 'Courier New';
+      text-align: -webkit-center;
     }
-    #Title {
-        padding: 10px;
-        font-size: 50px;
-        color: rgb(0, 0, 0);
+    #title {
+      padding: 10px;
+      font-size: 50px;
+      color: rgb(100, 100, 100);
     }
-    #colorDemoTitle {
-        padding: 70px;
-        background: #ddced7;
-        color: rgb(0, 0, 0);
-        font-size: 50px;
+    #demo-title {
+      padding: 30px;
+      width: 6em;
+      max-width: 70vw;
+      background: #ddced7;
+      color: rgb(0, 0, 0);
+      font-size: 50px;
     }
-    </style>
-    <head>
-            <script language="javascript" type="text/javascript" src="getRGB.js"></script>
-            <script  src = "https://liquidcarrot.io/carrot/cdn/0.2.27/carrot.js"></script>
-    </head>
-    <body>
-        <div id="Title"><b>Liquid Carrot Demo: Color Picker</b></div> 
-        <div id="colorDemoTitle">Liquid Carrot</div>
-        <p>Pick a color for the background and see how the text changes color based on background of the color!</p>
-        <input type = "color" value="#ddced7"/>
-        <script> 
-                const{ Network } = carrot; 
-                const input = document.querySelector("input")
-                const text = document.querySelector("#colorDemoTitle")
-        
-            input.addEventListener("change", (e) => {
-                const rgb = getRgb(e.target.value);      
-                const myNetwork = new Network(3,1);
-        
-                const trainingSet = [
-                    { input: [0.62,0.72,0.88], output: [1] },
-                    { input: [0.1,0.84,0.72], output: [1] },
-                    { input: [0.33,0.24,0.29], output: [0] },
-                    { input: [0.74,0.78,0.86], output: [1] },
-                    { input: [0.31,0.35,0.41], output: [0] },
-                    { input: [1,0.99,0], output: [1] },
-                    { input: [1,0.42,0.52], output: [0] },
-                    { input: [1,1,1], output: [1] },
-                    { input: [0.5,0.5,0.75], output: [0] },
-                    { input: [0.57,0.73,0.27], output: [0] },
-                ];
-        
-            myNetwork.train(trainingSet);
-        
-            const pickColor = myNetwork.activate(rgb); 
-            
-            text.style.background = e.target.value
-            text.style.color = Math.round(pickColor) === 0 ? "white" : "black" 
-          })
-            </script>
-    </body>
+    .color {
+      border: 0;
+      padding: 0;
+      background: none;
+      vertical-align: middle;
+    }
+    .container {
+      margin: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="title"><b>Color Bot</b></div>
+  
+  <div class="container">
+    <label for="color">Pick a color:</label>
+    <input class="color" type="color" value="#ddced7"/>
+  </div>
+  
+  <div id="demo-title" class="container">Liquid Carrot</div>
+  
+  
+  <script src="https://liquidcarrot.io/carrot/cdn/0.2.20/carrot.js"></script>
+  <script>
+    function getRGB(hex) {
+      const regex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+      hex = hex.replace(regex, function(r, g, b) {
+              return r + r + g + g + b + b;
+      });
+  
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  
+      return result ? [
+       Math.round(parseInt(result[1], 16) / 2.55) / 100 ,
+       Math.round(parseInt(result[2], 16) / 2.55) / 100,
+       Math.round(parseInt(result[3], 16) / 2.55) / 100
+      ]  : null;
+    }
+  </script>
+  <script>
+    const{ Network } = carrot;
+    const net = new Network(3,1);
+    
+    const dataset = [
+      { input: [0.62,0.72,0.88], output: [1] },
+      { input: [0.1,0.84,0.72], output: [1] },
+      { input: [0.33,0.24,0.29], output: [0] },
+      { input: [0.74,0.78,0.86], output: [1] },
+      { input: [0.31,0.35,0.41], output: [0] },
+      { input: [1,0.99,0], output: [1] },
+      { input: [1,0.42,0.52], output: [0] },
+      { input: [1,1,1], output: [1] },
+      { input: [0.5,0.5,0.75], output: [0] },
+      { input: [0.57,0.73,0.27], output: [0] },
+    ];
+    
+    net.train(dataset);
+    
+    const color = document.querySelector("input.color");
+    const text = document.querySelector("#demo-title");
+  
+    color.addEventListener("change", (e) => {
+      const rgb = getRGB(e.target.value);
+  
+      const text_color = net.activate(rgb);
+      
+      text.style.background = e.target.value
+      text.style.color = text_color < 0.5 ? "white" : "black"
+    })
+  </script>
+</body>
 </html>
